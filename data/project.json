@@ -1,0 +1,97 @@
+{
+    "name": "Development",
+    "version": "0.1.0",
+    "//": "this is a comment",
+    "resolution": [1024, 768],
+
+    "io": {
+    	"osc": {
+    		"host": "0.0.0.0",
+    		"port": 12021
+		}
+    },
+
+    "inputs": [
+        {
+        	"name": "x",
+        	"source": {
+        		"path": "/mouse",
+        		"index": 0 
+        	},
+        	"mapping": [0.0, 1.0, 0.2, 0.8],
+        	"smoothing": 0.0
+        },
+        {
+        	"name": "y",
+        	"source": {
+        		"path": "/mouse",
+        		"index": 1
+        	},
+        	"mapping": [0.0, 1.0, 0.2, 0.8],
+			"smoothing": 0.0
+        }
+    ],
+
+    "scenes": [
+        { 
+            "name": "infrastructure",
+            "image": {
+                "path": "scenes/infrastructure.glslf",
+                "iChannel0": {
+                    "type": "texture",
+                    "path": "textures/0_0_0_Abstract 1.jpg"
+                }
+            }
+        },
+        { 
+            "name": "hexvoxel",
+            "variables": [
+                {
+                    "name": "ofoVar_x",
+                    "source": "x",
+                    "mapping": [0.0, 1.0, -1.0, 1.0],
+                    "smoothing": 0.0
+                },
+                {
+                    "name": "ofoVar_y",
+                    "source": "y"
+                }
+            ],
+            "image": {
+                "path": "scenes/hexvoxel.glslf",
+                "iChannel0": {
+                    "type": "texture",
+                    "path": "textures/3_1_0_Wood.jpg"
+                }
+            }
+        },
+    	{
+    		"name": "tube",
+    		"image": {
+                "path": "scenes/tube.glslf"
+            },
+            "variables": [
+                {
+                    "name": "ofoVar_x",
+                    "source": "x"
+                },
+                {
+                    "name": "ofoVar_y",
+                    "source": "y"
+                }
+            ] 
+    	},
+    	{
+    		"name": "alien",
+    		"image": {
+                "path": "scenes/alien.glslf"
+            }
+    	},
+        {
+            "name": "octograms",
+            "image": {
+                "path": "scenes/octograms.glslf"
+            }
+        }
+    ]
+}

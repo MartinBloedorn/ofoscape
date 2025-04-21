@@ -1,0 +1,8 @@
+# Use LF for all text files
+* text eol=lf
+
+# Force specific files to use LF
+*.cpp text eol=lf
+*.h   text eol=lf
+*.vcxproj text eol=lf
+*.filters text eol=lf
