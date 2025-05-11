@@ -5,13 +5,16 @@
 
 // based on https://iquilezles.org/articles/voxellines
 
+uniform float ofoVar_x;
+uniform float ofoVar_y;
+
 //------------------------------------------------------------------------
 // Camera
 //------------------------------------------------------------------------
 
 void doCamera( out vec3 camPos, out vec3 camTar, in float time)
 {
-    float zoom = 50.;
+    float zoom = 50.*(ofoVar_x*2.0);
     vec3 initPos = vec3(zoom);
 	camPos = initPos;
     camPos.z += iTime*16.; // movement

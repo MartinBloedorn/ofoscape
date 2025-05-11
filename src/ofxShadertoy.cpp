@@ -269,8 +269,6 @@ void ofxShadertoy::begin() {
 void ofxShadertoy::end() const {
     mainShader.end();
 
-
-
     //channels[(size_t)buffer][0].unbind(1 + 4*instance);
     //channels[(size_t)buffer][1].unbind(2 + 4*instance);
     //channels[(size_t)buffer][2].unbind(3 + 4*instance);

@@ -1,6 +1,8 @@
 #include "ofMain.h"
 #include "ofApp.h"
 
+#include "ofxMidi.h"
+
 #include "ofoManager.h"
 #include "ofoProject.h"
 
@@ -17,6 +19,8 @@ int main( )
         ofLogError() << "Failed to load project.";
         return 1;
     }
+
+    ofxMidiIn().listInPorts();
 
     //Use ofGLFWWindowSettings for more options like multi-monitor fullscreen
     ofGLWindowSettings settings;

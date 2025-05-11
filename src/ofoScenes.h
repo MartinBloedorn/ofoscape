@@ -19,7 +19,7 @@ class Scene
 public:
     Scene(int width = 0, int height = 0);
 
-    bool parse(const ofJson& json, const std::filesystem::path& root);
+    bool setup(const ofJson& json, std::optional<std::reference_wrapper<const ofJson>> macros, const std::filesystem::path& root);
 
     bool load();
     void unload();
@@ -80,7 +80,7 @@ private:
     std::optional<ofxShadertoy> mShadertoy;
 
     bool parseBuffers(const ofJson& json, const std::filesystem::path& root);
-    bool parseVariables(const ofJson& json);
+    bool parseVariables(const ofJson& list);
 
     std::optional<std::reference_wrapper<ofTexture>> loadTexture(const std::filesystem::path& path);
 };
@@ -100,9 +100,13 @@ public:
     };
 
     bool loadScene(std::shared_ptr<Scene> scene, Slot slot);
+    void unloadScene(Slot slot);
+    std::shared_ptr<Scene> loadedScene(Slot slot);
     
     void setInputs(const std::vector<std::shared_ptr<Input>>& inputs);
+    
     void setCrossfade(float crossfade);
+    float crossfade() const { return mCrossfade; }
 
     void update();
     void setup();

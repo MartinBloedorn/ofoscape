@@ -1,14 +1,16 @@
 {
     "name": "Development",
     "version": "0.1.0",
-    "//": "this is a comment",
     "resolution": [1024, 768],
 
     "io": {
     	"osc": {
     		"host": "0.0.0.0",
     		"port": 12021
-		}
+		},
+        "midi": {
+            "port": "midiLoopback1"
+        }
     },
 
     "inputs": [
@@ -19,7 +21,7 @@
         		"index": 0 
         	},
         	"mapping": [0.0, 1.0, 0.2, 0.8],
-        	"smoothing": 0.0
+        	"lpf": 1.0
         },
         {
         	"name": "y",
@@ -27,8 +29,24 @@
         		"path": "/mouse",
         		"index": 1
         	},
-        	"mapping": [0.0, 1.0, 0.2, 0.8],
-			"smoothing": 0.0
+        	"mapping": [0.0, 1.0, 0.2, 0.8]
+        },
+        {
+            "name": "foo",
+            "source": {
+                "channel": 1,
+                "cc": 123
+            },
+            "mapping": [0.0, 127.0, 0.0, 1.0],
+            "hpf": 1.0
+        }
+    ],
+
+    "macros": [
+        {
+            "name": "macro_a",
+            "source": "x",
+            "mapping": [0.0, 1.0, 0.0, 10.0]
         }
     ],
 
@@ -85,7 +103,17 @@
     		"name": "alien",
     		"image": {
                 "path": "scenes/alien.glslf"
-            }
+            },
+            "variables": [
+                {
+                    "name": "ofoVar_x",
+                    "source": "x"
+                },
+                {
+                    "name": "ofoVar_y",
+                    "source": "y"
+                }
+            ]
     	},
         {
             "name": "octograms",

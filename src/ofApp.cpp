@@ -17,6 +17,7 @@ static Listener listener;
 ofApp::ofApp(ofo::Manager&& manager)
     : mManager(manager)
 { 
+    ofSetLogLevel(OF_LOG_VERBOSE);
 }
 
 //--------------------------------------------------------------
@@ -30,12 +31,16 @@ void ofApp::setup()
 
     mManager.setup();
 
+    //ofParameter<double> p;
+    //p.addListener(&listener, &Listener::onChanged);
+
     if (auto x = mManager.input("x")) {
-        x->addListener(&listener, &Listener::onChanged);
+        //x->addListener(&listener, &Listener::onChanged);
+        //(*x).addListener(&listener, &Listener::onChanged);
     }
-    if (auto y = mManager.input("y")) {
-        y->addListener(&listener, &Listener::onChanged);
-    }
+    //if (auto y = mManager.input("y")) {
+    //    y->addListener(&listener, &Listener::onChanged);
+    //}
 
     //mManager.loadScene("infrastructure");
     //mManager.loadScene("tube");
@@ -62,8 +67,13 @@ void ofApp::exit()
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key)
 {
-    if (key == 'f') {
+    switch (key) {
+    case 'f':
         ofToggleFullscreen();
+        break;
+    case 'r':
+        mManager.reloadScenes();
+        break;
     }
 }
 

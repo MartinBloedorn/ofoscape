@@ -39,7 +39,7 @@ std::pair<int, int> Project::getConfiguredResolution() const
 
 bool Project::loadProjectSettings(Manager& manager, ofJson& json)
 {
-    std::string host;
+    std::string host, midi;
     int port;
 
     try {
@@ -50,6 +50,8 @@ bool Project::loadProjectSettings(Manager& manager, ofJson& json)
 
         host = json["io"]["osc"]["host"];
         port = json["io"]["osc"]["port"];
+
+        midi    = json["io"]["midi"]["port"];
     }
     catch (const std::exception& e) {
         ofLogError() << "Error reading JSON: " << e.what();
@@ -57,6 +59,7 @@ bool Project::loadProjectSettings(Manager& manager, ofJson& json)
     }
 
     manager.setOscSettings(host, port);
+    manager.setMidiPort(midi);
 
     return true;
 }
@@ -69,7 +72,7 @@ bool Project::loadInputs(Manager& manager, ofJson& json)
     for (auto& [key, value] : json["inputs"].items()) 
     {
         inputs.push_back(std::make_shared<Input>());
-        if (!(ok = inputs.back()->parse(value))) break;
+        if (!(ok = inputs.back()->setup(value))) break;
     }
 
     if (ok) manager.setInputs(inputs);
@@ -81,10 +84,15 @@ bool Project::loadScenes(Manager& manager, ofJson& json, const std::filesystem::
     std::vector<std::shared_ptr<Scene>> scenes;
     bool ok = true;
 
+    std::optional<std::reference_wrapper<const ofJson>> macros;
+    if (json.contains("macros")) {
+        macros.emplace(std::cref(json["macros"]));
+    }
+
     for (auto& [key, value] : json["scenes"].items())
     {
         scenes.push_back(std::make_shared<Scene>(mConfiguredResolution.first, mConfiguredResolution.second));
-        if (!(ok = scenes.back()->parse(value, root))) break;
+        if (!(ok = scenes.back()->setup(value, macros, root))) break;
     }
 
     if (ok) manager.setScenes(scenes);

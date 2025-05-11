@@ -1,7 +1,10 @@
 #pragma once
 
-#include "ofxOsc.h"
 #include "ofJson.h"
+#include "ofxOsc.h"
+#include "ofxMidi.h"
+
+#include "ofoFilters.h"
 
 #include <string>
 
@@ -10,45 +13,56 @@
 namespace ofo
 {
 
-class Input
+// TODO: there seems to be an OF build issue with addListener when using ofParameter<double>
+class Value : public ofParameter<float>
 {
-public:
-    Input();
-
-    bool parse(const ofJson& json);
-    void update(const ofxOscMessage& message);
-
-    ofParameter<float> parameter() const {
-        return mParam;
-    }
-    std::string name() const {
-        return mParam.getName();
-    }
-    template<class ListenerClass, typename ListenerMethod>
-    void addListener(ListenerClass* listener, ListenerMethod method, int prio = OF_EVENT_ORDER_AFTER_APP) {
-        mParam.addListener(listener, method, prio);
-    }
-    template<class ListenerClass, typename ListenerMethod>
-    void removeListener(ListenerClass* listener, ListenerMethod method, int prio = OF_EVENT_ORDER_AFTER_APP) {
-        mParam.removeListener(listener, method, prio);
-    }
-
-private:
-    ofParameter<float> mParam;
-
-    struct {
-        std::string path;
-        int index = -1;
-    } mOsc;
+    std::optional<FilterIirSimple> mlpf, mhpf;
 
     struct MappingRange {
-        float inLo = 0.0, inHi = 1.0, outLo = 0.0, outHi = 1.0;
+        double inLo = 0.0;
+        double inHi = 1.0;
+        double outLo = 0.0;
+        double outHi = 1.0;
     } mRange;
 
-    struct {
-        float old;
-        float k = 0.0;
-    } mSmoothing;    
+    double mSetpoint = 0.0;
+
+public:
+    virtual bool setup(const ofJson& json);
+
+    void update(double val);
+    void update();
+
+    int getAsInt() {
+        return static_cast<int>(round(get()));
+    }
+};
+
+class Input : public Value
+{
+    struct OscSettings {
+        std::string path;
+        int         index = -1;
+    };
+
+    struct MidiSettings {
+        int channel = -1;
+        int cc = -1;
+    };
+
+    std::optional<OscSettings>  mOsc;
+    std::optional<MidiSettings> mMidi;
+
+public:
+    bool setup(const ofJson& json) override;
+
+    using Value::update;
+    void update(const ofxOscMessage& message);
+    void update(const ofxMidiMessage& message);
+
+    bool isOscInput() const {
+        return mOsc.has_value();
+    }
 };
 
 }

@@ -42,43 +42,51 @@ bool Scene::parseBuffers(const ofJson& json, const std::filesystem::path& root)
     return true;
 }
 
-bool Scene::parseVariables(const ofJson& json)
+bool Scene::parseVariables(const ofJson& list)
 {
-    // variables are optional:
-    if (!json.contains("variables")) return true;
+    if (list.empty()) return true;
 
     auto parseVariable = [](const ofJson& vjson) -> Variable {
         Variable var;
-        var.name = vjson["name"];
+        var.name   = vjson["name"];
         var.source = vjson["source"];
         return var;
     };
 
     try {
-        for (const auto& jvar : json["variables"]) {
+        for (const auto& jvar : list) {
             mVariables.push_back(std::move(parseVariable(jvar)));
         }
     }
     catch (const std::exception& e) {
-        ofLogError() << "Error parsing variables: " << e.what();
+        ofLogError() << "Error parsing variables/macros: " << e.what();
         return false;
     }
 
     return true;
 }
 
-bool Scene::parse(const ofJson& json, const std::filesystem::path& root)
+bool Scene::setup(const ofJson& json, 
+                  std::optional<std::reference_wrapper<const ofJson>> macros, 
+                  const std::filesystem::path& root)
 {
     try {
         mName   = json["name"];
-        //mShader = json["shader"];
     }
     catch (const std::exception& e) {
         ofLogError() << "Error reading JSON: " << e.what();
         return false;
     }
 
-    if (!parseBuffers(json, root) || !parseVariables(json))
+    if (!parseBuffers(json, root))
+        return false;
+
+    // optional variables:
+    if (!parseVariables(json.value("variables", ofJson::array({}))))
+        return false;
+
+    // optional macros:
+    if (macros.has_value() && !parseVariables(*macros))
         return false;
 
     ofLogNotice() << "Created scene: " << mName << "(" << mWidth << "," << mHeight << ")";
@@ -169,7 +177,7 @@ void Scene::bindInputs(const std::vector<std::shared_ptr<Input>>& inputs)
 {
     const auto findInput = [inputs](const std::string& name) -> std::shared_ptr<Input> {
         for (const auto& input : inputs) {
-            if (input->name() == name)
+            if (input->getName() == name)
                 return input;
         }
         return nullptr;
@@ -199,7 +207,7 @@ void Scene::render(ofFbo& fbo)
     mShadertoy->begin();
     for (auto& var : mVariables)
         if (var.input)
-            mShadertoy->setUniform1f(var.name, var.input->parameter());
+            mShadertoy->setUniform1f(var.name, *var.input);
 
     ofDrawRectangle(0, 0, mWidth, mHeight);
 
@@ -233,6 +241,19 @@ bool Visualizer::loadScene(std::shared_ptr<Scene> scene, Slot slot)
     return (mScenes[slot] = scene)->load();
 }
 
+void Visualizer::unloadScene(Slot slot)
+{
+    if (mScenes[slot]) {
+        mScenes[slot]->unload();
+        mScenes[slot].reset();
+    }
+}
+
+std::shared_ptr<Scene> ofo::Visualizer::loadedScene(Slot slot)
+{
+    return mScenes[slot];
+}
+
 void Visualizer::setInputs(const std::vector<std::shared_ptr<Input>>& inputs)
 {
     mInputs = inputs;
@@ -264,13 +285,20 @@ void Visualizer::setup()
     mGui->add(mCrossfade.set("crossfade", 0.5, 0.0, 1.0));
 
     for (auto input : mInputs)
-        mGui->add(input->parameter());
+        mGui->add(*input);
 }
 
 void Visualizer::draw()
 {
+    const auto isSceneVisible = [this](auto slot) {
+        if (slot == Slot_A)
+            return mCrossfade < 0.98;
+        else
+            return mCrossfade > 0.02;
+    };
+
     for (size_t i = 0; i < mScenes.size(); ++i)
-        if(mScenes[i]/* && mCrossfade > 0.0*/)
+        if(mScenes[i] && isSceneVisible(i))
             mScenes[i]->render(mFbos[i]);
 
     mOutputShader.begin();
