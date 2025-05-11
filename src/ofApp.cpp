@@ -6,18 +6,17 @@
 
 #include <filesystem>
 
-struct Listener {
-    void onChanged(float& val) {
-        ofLogNotice() << val;
-    }
-};
+//struct Listener {
+//    void onChanged(float& val) {
+//        ofLogNotice() << val;
+//    }
+//};
 
-static Listener listener;
+//static Listener listener;
 
 ofApp::ofApp(ofo::Manager&& manager)
     : mManager(manager)
 { 
-    ofSetLogLevel(OF_LOG_VERBOSE);
 }
 
 //--------------------------------------------------------------
@@ -26,25 +25,11 @@ void ofApp::setup()
     ofSetFrameRate(30);
     ofDisableArbTex();
 
-    // Actual CWD is different than reported here (bin instead of bin/data). Why?
-    ofLogNotice() << "CWD: " << std::filesystem::current_path();
-
     mManager.setup();
 
-    //ofParameter<double> p;
-    //p.addListener(&listener, &Listener::onChanged);
-
-    if (auto x = mManager.input("x")) {
-        //x->addListener(&listener, &Listener::onChanged);
-        //(*x).addListener(&listener, &Listener::onChanged);
-    }
-    //if (auto y = mManager.input("y")) {
-    //    y->addListener(&listener, &Listener::onChanged);
+    //if (auto x = mManager.input("x")) {
+    //    x->addListener(&listener, &Listener::onChanged);
     //}
-
-    //mManager.loadScene("infrastructure");
-    //mManager.loadScene("tube");
-    //mManager.loadScene("alien", false);
 }
 
 //--------------------------------------------------------------

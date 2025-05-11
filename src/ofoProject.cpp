@@ -51,7 +51,7 @@ bool Project::loadProjectSettings(Manager& manager, ofJson& json)
         host = json["io"]["osc"]["host"];
         port = json["io"]["osc"]["port"];
 
-        midi    = json["io"]["midi"]["port"];
+        midi = json["io"]["midi"]["port"];
     }
     catch (const std::exception& e) {
         ofLogError() << "Error reading JSON: " << e.what();
